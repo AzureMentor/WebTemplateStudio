@@ -3,12 +3,17 @@
   margin-bottom: 12px;
   cursor: pointer;
   padding: 12px;
-  background-color: var(--vscode-editor-lineHighlightBorder);
+  background-color: hsla(0, 0%, 47%, 0.2);
 }
 
 .container:focus {
   outline: 1px solid var(--vscode-contrastActiveBorder);
   border: 0.5px solid var(--vscode-contrastActiveBorder);
+}
+
+.container:focus:not([data-focus-visible-added]) {
+  outline: none;
+  border: none;
 }
 
 .selected,
@@ -24,6 +29,11 @@
 .selected:focus {
   border: none;
   outline: 3px solid var(--vscode-contrastActiveBorder);
+}
+
+.selected:focus:not([data-focus-visible-added]) {
+  border: none;
+  outline: 3px solid var(--vscode-editor-foreground);
 }
 
 .cardCount,
@@ -71,15 +81,13 @@
 }
 
 .cardFooter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   min-height: 30px;
 }
 
 .pageButtons {
   display: flex;
   justify-content: flex-end;
+  float: right;
 }
 
 .showCount {

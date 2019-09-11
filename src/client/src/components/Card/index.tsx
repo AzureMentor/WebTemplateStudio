@@ -44,7 +44,15 @@ export const Card = ({
       </div>
       <div className={styles.cardContent}>
         <div className={styles.cardBody}>
-          <CardBody formattedBody={formattedBody} />
+          <CardBody
+            formattedBody={formattedBody}
+            expectedTime={
+              option.expectedTime as FormattedMessage.MessageDescriptor
+            }
+            expectedPrice={
+              option.expectedPrice as FormattedMessage.MessageDescriptor
+            }
+          />
         </div>
         <div className={styles.selectionContainer}>
           <Link
@@ -54,7 +62,7 @@ export const Card = ({
             tabIndex={disabled! ? -1 : 0}
             onKeyUp={keyUpHandler}
           >
-            <FormattedMessage id="card.details" defaultMessage="Details" />
+            <FormattedMessage id="card.details" defaultMessage="Learn more" />
           </Link>
           <button
             disabled={disabled!}

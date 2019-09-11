@@ -15,6 +15,9 @@ import { IOption } from "../../types/option";
 import { ISelected } from "../../types/selected";
 import { Dispatch } from "redux";
 import RootAction from "../../actions/ActionType";
+import { AppState } from "../../reducers";
+
+import { isAddPagesModalOpenSelector } from "../../selectors/modalSelector";
 
 import { InjectedIntl, defineMessages, injectIntl } from "react-intl";
 
@@ -27,9 +30,13 @@ const messages = defineMessages({
     id: "pages.overlimitPagesMessage",
     defaultMessage: "You cannot add more than 20 pages to the project"
   },
+  noPageGeneration: {
+    id: "pages.noPageGeneration",
+    defaultMessage: "At least 1 page must be selected"
+  },
   iconAltMessage: {
     id: "pages.maxPagesText",
-    defaultMessage: "Icon for Max Pages Description"
+    defaultMessage: "Notification"
   }
 });
 
@@ -59,7 +66,7 @@ interface ISelectOptionProps {
 
 interface ISelectOptionState {
   selectedCardIndices: number[];
-  maxPageReached: boolean;
+  pageOutOfBounds: boolean;
   description: string;
 }
 
@@ -67,7 +74,11 @@ interface IDispatchProps {
   setDetailPage: (detailPageInfo: IOption) => void;
 }
 
-type Props = IDispatchProps & ISelectOptionProps & IProps;
+interface IStateProps {
+  isAddPagesModalOpen: boolean;
+}
+
+type Props = IDispatchProps & ISelectOptionProps & IStateProps & IProps;
 
 class SelectOption extends React.Component<Props, ISelectOptionState> {
   constructor(props: Props) {
@@ -75,7 +86,7 @@ class SelectOption extends React.Component<Props, ISelectOptionState> {
     const { selectedCardIndices } = props;
     this.state = {
       selectedCardIndices,
-      maxPageReached: false,
+      pageOutOfBounds: false,
       description: props.intl.formatMessage(messages.limitedPages)
     };
   }
@@ -256,11 +267,15 @@ class SelectOption extends React.Component<Props, ISelectOptionState> {
     const { internalName } = options[cardNumber];
     if (currentCardData && currentCardData.length >= MAX_PAGES_ALLOWED) {
       this.setState({
-        maxPageReached: true,
+        pageOutOfBounds: true,
         description: intl.formatMessage(messages.overlimitPages)
       });
       return;
     }
+    this.setState({
+      pageOutOfBounds: false,
+      description: intl.formatMessage(messages.limitedPages)
+    });
     if (cardTypeCount && handleCountUpdate) {
       cardTypeCount[internalName] = cardTypeCount[internalName]
         ? cardTypeCount[internalName] + 1
@@ -279,8 +294,15 @@ class SelectOption extends React.Component<Props, ISelectOptionState> {
       intl
     } = this.props;
     const { internalName } = options[cardNumber];
+    if (currentCardData && currentCardData.length <= 1) {
+      this.setState({
+        pageOutOfBounds: true,
+        description: intl.formatMessage(messages.noPageGeneration)
+      });
+      return;
+    }
     this.setState({
-      maxPageReached: false,
+      pageOutOfBounds: false,
       description: intl.formatMessage(messages.limitedPages)
     });
     if (
@@ -300,27 +322,32 @@ class SelectOption extends React.Component<Props, ISelectOptionState> {
       setDetailPage,
       isFrameworkSelection,
       isPagesSelection,
+      isAddPagesModalOpen,
       intl
     } = this.props;
-    const { maxPageReached, description } = this.state;
+    const { pageOutOfBounds, description } = this.state;
     return (
       <div>
         <Title>{title}</Title>
         {isPagesSelection && (
           <div
             className={classnames(styles.description, {
-              [styles.borderGreen]: !maxPageReached,
-              [styles.borderYellow]: maxPageReached
+              [styles.borderGreen]: !pageOutOfBounds,
+              [styles.borderYellow]: pageOutOfBounds
             })}
           >
             <Notification
-              showWarning={maxPageReached}
+              showWarning={pageOutOfBounds}
               text={description}
               altMessage={intl.formatMessage(messages.iconAltMessage)}
             />
           </div>
         )}
-        <div className={styles.container}>
+        <div
+          className={classnames(styles.container, {
+            [styles.modalContainer]: isAddPagesModalOpen
+          })}
+        >
           {options.map((option, cardNumber) => {
             const {
               svgUrl,
@@ -351,6 +378,7 @@ class SelectOption extends React.Component<Props, ISelectOptionState> {
                 clickCount={this.getCardCount(internalName)}
                 addPage={(cardNumber: number) => this.addPage(cardNumber)}
                 removePage={(cardNumber: number) => this.removePage(cardNumber)}
+                showLink={!isAddPagesModalOpen}
               />
             );
           })}
@@ -359,6 +387,10 @@ class SelectOption extends React.Component<Props, ISelectOptionState> {
     );
   }
 }
+
+const mapStateToProps = (state: AppState): IStateProps => ({
+  isAddPagesModalOpen: isAddPagesModalOpenSelector(state)
+});
 
 const mapDispatchToProps = (
   dispatch: Dispatch<RootAction>
@@ -369,6 +401,6 @@ const mapDispatchToProps = (
 });
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(injectIntl(SelectOption));

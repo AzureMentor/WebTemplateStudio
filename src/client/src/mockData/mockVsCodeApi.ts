@@ -16,8 +16,22 @@ const mockResourceGroups = Array.from({ length: 12 }).fill({
   value: RESOURCE_GROUP_MOCK
 });
 
+const SUBSCRIPTION_MOCK: string = "GIV.Hackathon";
+const mockSubscriptions = Array.from(Array(10).keys()).map(
+  (element: number) => {
+    return {
+      label: SUBSCRIPTION_MOCK + element,
+      value: SUBSCRIPTION_MOCK + element
+    };
+  }
+);
+
 const DEV_NO_ERROR_MSG: string = "in development, no error message";
 const DEV_NO_ERROR_TYPE: string = "in development, no error type";
+
+const mockAppServiceName: string = "mockappservicename";
+const mockFunctionsName: string = "mockfunctionsname";
+const mockCosmosDBName: string = "mockcosmosdbname";
 
 /**
  * Models the functionality of acquireVsCodeApi() from vscode for use
@@ -40,7 +54,7 @@ const mockVsCodeApi = () => ({
               payload: {
                 frameworks: [
                   {
-                    name: "ReactJS",
+                    name: "React",
                     displayName: "React",
                     icon: "",
                     summary: "JavaScript framework",
@@ -50,10 +64,10 @@ const mockVsCodeApi = () => ({
                     order: 1,
                     metadataType: "Framework",
                     licenses:
-                      "[ReactJS](https://github.com/facebook/react/blob/master/LICENSE)  \n[Create React App](https://github.com/facebook/create-react-app/blob/master/LICENSE)",
+                      "[React](https://github.com/facebook/react/blob/master/LICENSE)  \n[Create React App](https://github.com/facebook/create-react-app/blob/master/LICENSE)",
                     licenseTerms: [
                       {
-                        text: "ReactJS",
+                        text: "React",
                         url:
                           "https://github.com/facebook/react/blob/master/LICENSE"
                       },
@@ -135,7 +149,7 @@ const mockVsCodeApi = () => ({
                     }
                   },
                   {
-                    name: "NodeJS",
+                    name: "Node",
                     displayName: "Node.js/Express",
                     icon: "",
                     summary: "JavaScript framework",
@@ -145,20 +159,20 @@ const mockVsCodeApi = () => ({
                     order: 1,
                     metadataType: "Framework",
                     licenses:
-                      "[NodeJS](https://github.com/nodejs/node/blob/master/LICENSE)  \n[ExpressJS](https://github.com/expressjs/express/blob/master/LICENSE)  \n[ExpressJS Generator](https://github.com/expressjs/generator/blob/master/LICENSE)",
+                      "[Node](https://github.com/nodejs/node/blob/master/LICENSE)  \n[Express](https://github.com/expressjs/express/blob/master/LICENSE)  \n[Express Generator](https://github.com/expressjs/generator/blob/master/LICENSE)",
                     licenseTerms: [
                       {
-                        text: "NodeJS",
+                        text: "Node",
                         url:
                           "https://github.com/nodejs/node/blob/master/LICENSE"
                       },
                       {
-                        text: "ExpressJS",
+                        text: "Express",
                         url:
                           "https://github.com/expressjs/express/blob/master/LICENSE"
                       },
                       {
-                        text: "ExpressJS Generator",
+                        text: "Express Generator",
                         url:
                           "https://github.com/expressjs/generator/blob/master/LICENSE"
                       }
@@ -247,7 +261,7 @@ const mockVsCodeApi = () => ({
                     name: "Grid",
                     defaultName: "Grid",
                     description:
-                      "A page displaying simple image and text components which are organized into a grid.",
+                      "Simple image and text components which are organized into a grid.",
                     richDescription:
                       "A page displaying simple image and text components which are organized into a grid. Grid pages are a system for creating order among elements in a website.",
                     author: "Microsoft",
@@ -272,11 +286,10 @@ const mockVsCodeApi = () => ({
                     requiredVisualStudioWorkloads: []
                   },
                   {
-                    emplateId: "wts.Page.React.List",
+                    templateId: "wts.Page.React.List",
                     name: "List",
                     defaultName: "List",
-                    description:
-                      "The list page allows you to add and remove text from an adaptive list.",
+                    description: "Add and remove text from an adaptive list.",
                     richDescription:
                       "The list page allows you to add custom text in the form of an adaptive list. This pattern is frequently used for blog pages and messaging apps. If a database is selected from the Azure Cloud Services the list page will automatically connect to the deployed Azure database.",
                     author: "Microsoft",
@@ -305,7 +318,7 @@ const mockVsCodeApi = () => ({
                     name: "Master Detail",
                     defaultName: "Master Detail",
                     description:
-                      "The master-detail page has a master pane and a details pane for content.",
+                      "A master pane and a details pane for content.",
                     richDescription:
                       "The master-detail page has a master pane and a details pane for content. When an item in the master list is selected, the details pane is updated. This pattern is frequently used for email and address books.",
                     author: "Microsoft",
@@ -385,6 +398,20 @@ const mockVsCodeApi = () => ({
             "*"
           );
           break;
+        case EXTENSION_COMMANDS.NAME_APP_SERVICE:
+          window.postMessage(
+            {
+              module: EXTENSION_MODULES.AZURE,
+              command: EXTENSION_COMMANDS.NAME_APP_SERVICE,
+              payload: {
+                isAvailable: message.appName.length > 0
+              },
+              message: DEV_NO_ERROR_MSG,
+              errorType: DEV_NO_ERROR_TYPE
+            },
+            "*"
+          );
+          break;
         case EXTENSION_COMMANDS.SUBSCRIPTION_DATA_COSMOS:
           // produces locations and resource groups in development
           window.postMessage(
@@ -393,7 +420,8 @@ const mockVsCodeApi = () => ({
               command: EXTENSION_COMMANDS.SUBSCRIPTION_DATA_COSMOS,
               payload: {
                 locations: mockLocations,
-                resourceGroups: mockResourceGroups
+                resourceGroups: mockResourceGroups,
+                validName: mockCosmosDBName
               }
             },
             "*"
@@ -407,7 +435,23 @@ const mockVsCodeApi = () => ({
               command: EXTENSION_COMMANDS.SUBSCRIPTION_DATA_FUNCTIONS,
               payload: {
                 locations: mockLocations,
-                resourceGroups: mockResourceGroups
+                resourceGroups: mockResourceGroups,
+                validName: mockFunctionsName
+              }
+            },
+            "*"
+          );
+          break;
+        case EXTENSION_COMMANDS.SUBSCRIPTION_DATA_APP_SERVICE:
+          // produces locations and resource groups in development
+          window.postMessage(
+            {
+              module: EXTENSION_MODULES.AZURE,
+              command: EXTENSION_COMMANDS.SUBSCRIPTION_DATA_APP_SERVICE,
+              payload: {
+                locations: mockLocations,
+                resourceGroups: mockResourceGroups,
+                validName: mockAppServiceName
               }
             },
             "*"
@@ -430,14 +474,18 @@ const mockVsCodeApi = () => ({
               command: EXTENSION_COMMANDS.GEN_STATUS,
               payload: {
                 templates: {
-                  success: false,
-                  failure: true
-                },
-                cosmos: {
                   success: true,
                   failure: false
                 },
+                cosmos: {
+                  success: false,
+                  failure: true
+                },
                 azureFunctions: {
+                  success: true,
+                  failure: false
+                },
+                appService: {
                   success: true,
                   failure: false
                 }
@@ -489,9 +537,7 @@ const mockVsCodeApi = () => ({
               command: "login",
               payload: {
                 email: "devEnvironment2@email.com",
-                subscriptions: [
-                  { value: "GIV.Hackathon", label: "GIV.Hackathon" }
-                ]
+                subscriptions: mockSubscriptions
               }
             },
             "*"
